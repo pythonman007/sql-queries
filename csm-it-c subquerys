@@ -1,0 +1,79 @@
+select
+  o.order_id , 
+  o.user_id ,
+  o.amount
+from orders as o 
+where o.amount > ( select avg(o1.amount)  from orders as o1 ) 
+
+select 
+  u.user_id ,
+  u.name 
+from users as u
+where u.user_id in ( select distinct o.user_id from orders as o )
+
+  
+select max(max_amount)
+from
+(select o.user_id , max(o.amount) as max_amount 
+from orders as o 
+group by o.user_id) as new_record    
+
+
+
+select
+  o.order_id , 
+  ( select u.name from users as u where u.user_id = o.user_id )
+from orders as o 
+
+
+
+select
+  u.user_id , 
+  u.name 
+from users as u 
+where u.user_id in ( select distinct o.user_id from orders as o ) 
+
+select 
+  o.user_id , 
+  o.product_id
+from orders as o 
+where o.product_id in (select product_id from products where product = 'Tablet' ) 
+
+
+select 
+  u.user_id , 
+  u.name 
+from users as u 
+where exists(
+  select 1
+  from orders as o 
+  where u.user_id = o.user_id and o.amount >= 500
+)
+
+
+select 
+  u.user_id , 
+  u.name 
+from users as u 
+where not exists(
+  select 1
+  from orders as o 
+  where u.user_id = o.user_id 
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
