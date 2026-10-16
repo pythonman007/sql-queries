@@ -62,13 +62,26 @@ where not exists(
 )
 
 
+select
+  o.user_id 
+from orders as o 
+group by o.user_id 
+having count(distinct product_id) = (select count(*) from products) 
 
 
-
-
-
-
-
+select
+  u.user_id , 
+  u.name 
+from users as u 
+where not exists(
+  select 1
+  from products as p 
+  where not exists(
+    select 1
+    from orders as o 
+    where u.user_id = o.user_id and p.product_id = o.product_id ; 
+  )
+)
 
 
 
