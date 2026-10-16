@@ -86,7 +86,12 @@ where not exists(
 
 
 
-
+select
+  u.user_id , 
+  u.name , 
+  ( select max(o.amount) from orders as o where u.user_id = o.user_id  ) as max_amount 
+from users as u 
+where u.user_id in ( select distinct o.user_id from orders as o )
 
 
 
