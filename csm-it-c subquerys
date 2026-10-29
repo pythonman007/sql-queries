@@ -1,56 +1,59 @@
-select
+select  -- non-corelated 
   o.order_id , 
-  o.user_id ,
+  o.user_id , 
   o.amount
 from orders as o 
-where o.amount > ( select avg(o1.amount)  from orders as o1 ) 
+where o.amount > ( select avg(o1.amount) from orders as o1 ) -- scalar subquery 
 
-select 
-  u.user_id ,
+select -- non-corelated subquery 
+  u.user_id , 
   u.name 
-from users as u
-where u.user_id in ( select distinct o.user_id from orders as o )
+from users as u 
+where u.user_id in ( select distinct o.user_id from orders as o ) -- col subquery 
 
-  
-select max(max_amount)
-from
-(select o.user_id , max(o.amount) as max_amount 
-from orders as o 
-group by o.user_id) as new_record    
-
-
-
-select
+select -- co-related subquery 
   o.order_id , 
-  ( select u.name from users as u where u.user_id = o.user_id )
+  ( select u.name  from users as u where o.user_id = u.user_id ) -- row subquery 
 from orders as o 
 
 
+select max(max_amount) -- non-corelated subquery 
+from (select
+  o.user_id , max(o.amount) as max_amount 
+from orders as o 
+group by o.user_id) as new_table  -- table subquery 
 
+
+-- subquery with in 
+-- scenario - 1 
 select
   u.user_id , 
   u.name 
 from users as u 
-where u.user_id in ( select distinct o.user_id from orders as o ) 
+where u.user_id in ( select distinct o.user_id from orders as o )
 
+-- scenario - 2 
 select 
   o.user_id , 
   o.product_id
 from orders as o 
-where o.product_id in (select product_id from products where product = 'Tablet' ) 
+where o.product_id in ( select product_id  from products where product = 'Tablet' ) 
 
 
-select 
+-- exists 
+-- scenario - 1 , scenario - 2 
+select    -- 
   u.user_id , 
   u.name 
 from users as u 
 where exists(
   select 1
   from orders as o 
-  where u.user_id = o.user_id and o.amount >= 500
+  where u.user_id = o.user_id and o.amount >= 500 
 )
 
-
+-- not exists 
+-- scenario - 1 
 select 
   u.user_id , 
   u.name 
@@ -58,40 +61,27 @@ from users as u
 where not exists(
   select 1
   from orders as o 
-  where u.user_id = o.user_id 
+  where o.user_id = u.user_id   
 )
-
-
-select
-  o.user_id 
-from orders as o 
-group by o.user_id 
-having count(distinct product_id) = (select count(*) from products) 
-
-
-select
-  u.user_id , 
-  u.name 
-from users as u 
-where not exists(
-  select 1
-  from products as p 
-  where not exists(
-    select 1
-    from orders as o 
-    where u.user_id = o.user_id and p.product_id = o.product_id ; 
-  )
-)
-
-
 
 
 select
   u.user_id , 
   u.name , 
-  ( select max(o.amount) from orders as o where u.user_id = o.user_id  ) as max_amount 
-from users as u 
+  ( select max(o1.amount) from orders as o1 where u.user_id = o1.user_id) as max_amount 
+from users as u
 where u.user_id in ( select distinct o.user_id from orders as o )
+
+
+
+
+
+
+
+
+
+
+
 
 
 
